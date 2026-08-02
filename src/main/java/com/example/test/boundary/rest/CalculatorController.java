@@ -17,7 +17,7 @@ public class CalculatorController {
 
     @PostMapping(value = "/add")
     private AddResponse add(@RequestBody AddRequest addRequest) {
-        double value = calculatorService.add(addRequest.getVal1(), addRequest.getVal2());
+        double value = calculatorService.add(addRequest.val1(), addRequest.val2());
         return new AddResponse(value);
     }
 
