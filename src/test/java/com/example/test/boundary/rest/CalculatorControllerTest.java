@@ -1,44 +1,144 @@
 package com.example.test.boundary.rest;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import com.example.test.control.CalculatorService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-public class CalculatorControllerTest {
-    private final WebApplicationContext webApplicationContext;
+@WebMvcTest(
+        controllers = CalculatorController.class,
+        properties = "spring.jackson.mapper.allow-coercion-of-scalars=false"
+)
+class CalculatorControllerTest {
+    private final static String ADD_ENDPOINT = "/add";
+    private final static String DIV_ENDPOINT = "/div";
+    private final static String VALUE = "$.value";
 
+    @Autowired
     private MockMvc mockMvc;
 
-    public CalculatorControllerTest(WebApplicationContext webApplicationContext) {
-        this.webApplicationContext = webApplicationContext;
-    }
+    @MockitoBean
+    private CalculatorService calculatorService;
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
+    @ParameterizedTest
+    @MethodSource("sumArguments")
+    void addShouldReturnCorrectValue(double val1, double val2, double expected, String requestBody) throws Exception {
+        when(calculatorService.add(val1, val2)).thenReturn(expected);
 
-    @Test
-    void addShouldReturnCorrectValue() throws Exception{
-        mockMvc.perform(post("/add")
+        mockMvc.perform(post(ADD_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(requestBody)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(VALUE).value(expected));
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("divArguments")
+    void divShouldReturnCorrectValue(double val1, double val2, double expected) throws Exception {
+        when(calculatorService.div(12.0, 6.0)).thenReturn(2.0);
+
+        mockMvc.perform(get(DIV_ENDPOINT)
+                        .param("val1", "12.0")
+                        .param("val2", "6.0")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(VALUE).value(2.0));
+
+    }
+
+    private static Stream<Arguments> sumArguments() {
+        return Stream.of(
+                Arguments.arguments(
+                        12.0,
+                        6.0,
+                        2.0,
+                        """
                         {
                             "val1": 12.0,
                             "val2": 6.0
                         }
-                        """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.value").value(18.0));
+                        """),
+                Arguments.arguments(
+                        0.0,
+                        13.5,
+                        13.5,
+                        """
+                        {
+                            "val1": 0.0,
+                            "val2": 13.5
+                        }
+                        """
+                ),
+                Arguments.arguments(
+                        12.25,
+                        13.5,
+                        25.75,
+                        """
+                        {
+                            "val1": 12.25,
+                            "val2": 13.5
+                        }
+                        """
+                ),
+                Arguments.arguments(
+                        -12.0,
+                        13.5,
+                        1.5,
+                        """
+                        {
+                            "val1": -12.0,
+                            "val2": 13.5
+                        }
+                        """
+                ),
+                Arguments.arguments(
+                        -12.25,
+                        -13.5,
+                        -25.75,
+                        """
+                        {
+                            "val1": -12.25,
+                            "val2": -13.5
+                        }
+                        """
+                ),
+                Arguments.arguments(
+                        0.0,
+                        0.0,
+                        0.0,
+                        """
+                        {
+                            "val1": 0.0,
+                            "val2": 0.0
+                        }
+                        """
+                )
+        );
+    }
 
+    private static Stream<Arguments> divArguments() {
+        return Stream.of(
+                Arguments.arguments(12.0, 2.0, 6.0),
+                Arguments.arguments(0.0, 13.5, 0.0),
+                Arguments.arguments(12.5, 2.0, 6.25),
+                Arguments.arguments(1.0, 2.0, 0.5),
+                Arguments.arguments(-12.25, -2.0, 6.125),
+                Arguments.arguments(-12.25, 2.0, -6.125)
+        );
     }
 }
