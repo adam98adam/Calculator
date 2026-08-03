@@ -10,10 +10,12 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class BadRequestHandler {
-    private final HttpStatus status = HttpStatus.BAD_REQUEST;
+    private static final HttpStatus status = HttpStatus.BAD_REQUEST;
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(
@@ -24,7 +26,7 @@ public class BadRequestHandler {
                 Instant.now(),
                 status.value(),
                 status.getReasonPhrase(),
-                exception.getMessage(),
+                new ArrayList<>(List.of(exception.getMessage())),
                 ((ServletWebRequest) webRequest).getRequest().getRequestURI()
         );
 
