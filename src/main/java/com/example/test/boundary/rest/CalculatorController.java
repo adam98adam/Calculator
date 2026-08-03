@@ -1,7 +1,7 @@
 package com.example.test.boundary.rest;
 
-import com.example.test.boundary.dto.AddRequest;
-import com.example.test.boundary.dto.AddResponse;
+import com.example.test.boundary.dto.Request;
+import com.example.test.boundary.dto.Response;
 import com.example.test.control.CalculatorService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,9 +16,9 @@ public class CalculatorController {
     }
 
     @PostMapping(value = "/add")
-    private AddResponse add(@RequestBody AddRequest addRequest) {
-        double value = calculatorService.add(addRequest.val1(), addRequest.val2());
-        return new AddResponse(value);
+    private Response add(@RequestBody Request request) {
+        double value = calculatorService.add(request.val1(), request.val2());
+        return new Response(value);
     }
 
 }
