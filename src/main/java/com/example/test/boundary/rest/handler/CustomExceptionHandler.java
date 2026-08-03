@@ -24,6 +24,7 @@ import java.util.Objects;
 
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
+    private static final String REQUEST_BODY_CONTAINS_INVALID_JSON = "Request body contains invalid JSON.";
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -78,9 +79,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                     .filter(Objects::nonNull)
                     .findFirst()
                     .map(field -> "Field '" + field + "' has invalid type.")
-                    .orElse("Request body contains invalid JSON.");
+                    .orElse(REQUEST_BODY_CONTAINS_INVALID_JSON);
         }
 
-        return "Request body contains invalid JSON.";
+        return REQUEST_BODY_CONTAINS_INVALID_JSON;
     }
 }
