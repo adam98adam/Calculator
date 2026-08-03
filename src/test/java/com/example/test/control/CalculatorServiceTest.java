@@ -1,5 +1,6 @@
 package com.example.test.control;
 
+import com.example.test.control.exception.DivisionByZeroException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -31,7 +32,7 @@ class CalculatorServiceTest {
     @Test
     void divRejectsDivisionByZero() {
         assertThatThrownBy(() -> calculatorService.div(5.0, 0.0))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DivisionByZeroException.class)
                 .hasMessage("Divisor cannot be zero.");
     }
 

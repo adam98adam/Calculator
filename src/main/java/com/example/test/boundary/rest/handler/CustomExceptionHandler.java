@@ -1,4 +1,4 @@
-package com.example.test.boundary.rest;
+package com.example.test.boundary.rest.handler;
 
 import com.example.test.boundary.dto.ErrorResponse;
 import org.jspecify.annotations.NonNull;
