@@ -50,14 +50,14 @@ class CalculatorControllerTest {
     @ParameterizedTest
     @MethodSource("divArguments")
     void divShouldReturnCorrectValue(double val1, double val2, double expected) throws Exception {
-        when(calculatorService.div(12.0, 6.0)).thenReturn(2.0);
+        when(calculatorService.div(val1, val2)).thenReturn(expected);
 
         mockMvc.perform(get(DIV_ENDPOINT)
-                        .param("val1", "12.0")
-                        .param("val2", "6.0")
+                        .param("val1", String.valueOf(val1))
+                        .param("val2", String.valueOf(val2))
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(VALUE).value(2.0));
+                .andExpect(jsonPath(VALUE).value(expected));
 
     }
 
