@@ -13,8 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,7 +56,7 @@ class CalculatorControllerTest {
 
     @ParameterizedTest
     @DisplayName("POST add endpoint should return BAD REQUEST when passed value has invalid type or is missing")
-    @MethodSource("sumArgumentsWithIncorrectType")
+    @MethodSource("sumArgumentsWithInvalidType")
     void addShouldReturnBadRequestWhenValueHasInvalidType(String requestBody, String expectedMessage) throws Exception {
         mockMvc.perform(post(ADD_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,6 +120,24 @@ class CalculatorControllerTest {
 
     }
 
+
+    @ParameterizedTest
+    @DisplayName("GET div endpoint should return BAD REQUEST when both params have invalid type")
+    @MethodSource("divideArgumentsBothWithInvalidType")
+    void divShouldReturnBadRequestWhenBothParamsHaveInvalidType(String val1, String val2, List<String> expectedMessages) throws Exception {
+        mockMvc.perform(get(DIV_ENDPOINT)
+                        .param("val1", val1)
+                        .param("val2", val2)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(2)))
+                .andExpect(jsonPath("$.messages", containsInAnyOrder(expectedMessages.toArray())))
+                .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
+
+    }
 
 
     private static Stream<Arguments> sumArguments() {
@@ -189,7 +210,7 @@ class CalculatorControllerTest {
         );
     }
 
-    private static Stream<Arguments> sumArgumentsWithIncorrectType() {
+    private static Stream<Arguments> sumArgumentsWithInvalidType() {
         return Stream.of(
                 Arguments.arguments(
                         """
@@ -313,6 +334,35 @@ class CalculatorControllerTest {
                 Arguments.arguments(1.0, 2.0, 0.5),
                 Arguments.arguments(-12.25, -2.0, 6.125),
                 Arguments.arguments(-12.25, 2.0, -6.125)
+        );
+    }
+
+    private static Stream<Arguments> divideArgumentsBothWithInvalidType() {
+        return Stream.of(
+                Arguments.arguments(
+                        "abc",
+                        "abc",
+                        List.of(
+                                "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"abc\"",
+                                "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"abc\""
+                        )
+                ),
+                Arguments.arguments(
+                        "null",
+                        "null",
+                        List.of(
+                                "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"null\"",
+                                "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"null\""
+                        )
+                ),
+                Arguments.arguments(
+                        "",
+                        "",
+                        List.of(
+                                "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String",
+                                "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String"
+                        )
+                )
         );
     }
 }
