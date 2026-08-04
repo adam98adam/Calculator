@@ -1,6 +1,7 @@
 package com.example.test.boundary.rest;
 
 import com.example.test.control.CalculatorService;
+import com.example.test.control.exception.DivisionByZeroException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -160,6 +161,24 @@ class CalculatorControllerTest {
 
     }
 
+    @Test
+    @DisplayName("GET div endpoint should return BAD REQUEST when divisor is zero")
+    void divShouldReturnBadRequestWhenDivisorIsZero() throws Exception {
+        when(calculatorService.divide(5, 0)).thenThrow(new DivisionByZeroException());
+
+        mockMvc.perform(get(DIV_ENDPOINT)
+                        .param("val1", "5")
+                        .param("val2", "0")
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
+                .andExpect(jsonPath("$.messages").value("Divisor cannot be zero."))
+                .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
+
+    }
 
     private static Stream<Arguments> sumArguments() {
         return Stream.of(
