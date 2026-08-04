@@ -17,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.exc.MismatchedInputException;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +40,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             errors.add(objectError.getDefaultMessage());
         }
 
-        ErrorResponse response = new ErrorResponse(
-                Instant.now(),
-                status.value(),
-                ((HttpStatus) status).getReasonPhrase(),
+        ErrorResponse response = ErrorResponse.of(
+                (HttpStatus) status,
                 errors,
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
@@ -59,13 +56,12 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request
     ) {
-        ErrorResponse response = new ErrorResponse(
-                Instant.now(),
-                status.value(),
-                ((HttpStatus) status).getReasonPhrase(),
+        ErrorResponse response = ErrorResponse.of(
+                (HttpStatus) status,
                 new ArrayList<>(List.of(buildMessage(ex))),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
+
         return ResponseEntity.status(status).body(response);
     }
 

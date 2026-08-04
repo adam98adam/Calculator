@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +21,8 @@ public class BadRequestHandler {
             BadRequestException exception,
             WebRequest webRequest
     ) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                Instant.now(),
-                status.value(),
-                status.getReasonPhrase(),
+        ErrorResponse errorResponse = ErrorResponse.of(
+                HttpStatus.BAD_REQUEST,
                 new ArrayList<>(List.of(exception.getMessage())),
                 ((ServletWebRequest) webRequest).getRequest().getRequestURI()
         );
