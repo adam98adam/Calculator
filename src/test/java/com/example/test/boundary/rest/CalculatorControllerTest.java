@@ -51,7 +51,7 @@ class CalculatorControllerTest {
     }
 
     @ParameterizedTest
-    @DisplayName("POST add endpoint should return BAD REQUEST when passed value has invalid type")
+    @DisplayName("POST add endpoint should return BAD REQUEST when passed value has invalid type or is missing")
     @MethodSource("sumArgumentsWithIncorrectType")
     void addShouldReturnBadRequestWhenValueHasInvalidType(String requestBody, String expectedMessage) throws Exception {
         mockMvc.perform(post(ADD_ENDPOINT)
@@ -225,6 +225,22 @@ class CalculatorControllerTest {
                         }
                         """,
                         "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val2": 6.0
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 6.0
+                        }
+                        """,
+                        "Field 'val2' has invalid type."
                 )
         );
     }
