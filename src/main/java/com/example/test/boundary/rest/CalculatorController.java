@@ -25,7 +25,7 @@ public class CalculatorController {
 
     @GetMapping(value = "/div")
     private Response div(@ModelAttribute Request request) {
-        double value = calculatorService.div(request.val1(), request.val2());
+        double value = calculatorService.divide(request.val1(), request.val2());
         return new Response(value);
     }
 }

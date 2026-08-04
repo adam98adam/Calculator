@@ -1,6 +1,7 @@
 package com.example.test.boundary.rest;
 
 import com.example.test.control.CalculatorService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,6 +35,7 @@ class CalculatorControllerTest {
     private CalculatorService calculatorService;
 
     @ParameterizedTest
+    @DisplayName("POST add endpoint should return OK status with correct value")
     @MethodSource("sumArguments")
     void addShouldReturnCorrectValue(double val1, double val2, double expected, String requestBody) throws Exception {
         when(calculatorService.add(val1, val2)).thenReturn(expected);
@@ -48,9 +50,10 @@ class CalculatorControllerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("divArguments")
+    @DisplayName("GET div endpoint should return OK status with correct value")
+    @MethodSource("divideArguments")
     void divShouldReturnCorrectValue(double val1, double val2, double expected) throws Exception {
-        when(calculatorService.div(val1, val2)).thenReturn(expected);
+        when(calculatorService.divide(val1, val2)).thenReturn(expected);
 
         mockMvc.perform(get(DIV_ENDPOINT)
                         .param("val1", String.valueOf(val1))
@@ -131,7 +134,7 @@ class CalculatorControllerTest {
         );
     }
 
-    private static Stream<Arguments> divArguments() {
+    private static Stream<Arguments> divideArguments() {
         return Stream.of(
                 Arguments.arguments(12.0, 2.0, 6.0),
                 Arguments.arguments(0.0, 13.5, 0.0),

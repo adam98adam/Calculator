@@ -1,6 +1,7 @@
 package com.example.test.control;
 
 import com.example.test.control.exception.DivisionByZeroException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CalculatorServiceTest {
     private final CalculatorService calculatorService = new CalculatorService();
 
-
     @ParameterizedTest
+    @DisplayName("sum should return correct value")
     @MethodSource("sumArguments")
     void returnSum(double val1, double val2, double expected) {
         assertThat(calculatorService.add(val1, val2))
@@ -23,15 +24,17 @@ class CalculatorServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("divArguments")
+    @DisplayName("divide should return correct value")
+    @MethodSource("divideArguments")
     void returnDiv(double val1, double val2, double expected) {
-        assertThat(calculatorService.div(val1, val2))
+        assertThat(calculatorService.divide(val1, val2))
                 .isEqualTo(expected);
     }
 
     @Test
-    void divRejectsDivisionByZero() {
-        assertThatThrownBy(() -> calculatorService.div(5.0, 0.0))
+    @DisplayName("divide should throw DivisionByZeroException when divisor is zero")
+    void divideRejectsDivisionByZero() {
+        assertThatThrownBy(() -> calculatorService.divide(5.0, 0.0))
                 .isInstanceOf(DivisionByZeroException.class)
                 .hasMessage("Divisor cannot be zero.");
     }
@@ -47,7 +50,7 @@ class CalculatorServiceTest {
         );
     }
 
-    private static Stream<Arguments> divArguments() {
+    private static Stream<Arguments> divideArguments() {
         return Stream.of(
                 Arguments.arguments(12.0, 2.0, 6.0),
                 Arguments.arguments(0.0, 13.5, 0.0),
