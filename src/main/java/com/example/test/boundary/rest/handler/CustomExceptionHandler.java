@@ -32,17 +32,9 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpStatusCode status,
             @NonNull WebRequest request
     ) {
-        List<String> errors = new ArrayList<>();
-        for (FieldError fieldError: ex.getBindingResult().getFieldErrors()) {
-            errors.add("Validation failed for field: '" + fieldError.getField() + "' message: " + fieldError.getDefaultMessage());
-        }
-        for (ObjectError objectError: ex.getBindingResult().getGlobalErrors()) {
-            errors.add(objectError.getDefaultMessage());
-        }
-
         ErrorResponse response = ErrorResponse.of(
                 (HttpStatus) status,
-                errors,
+                buildMethodArgumentNotValidMessage(ex),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
 
@@ -65,8 +57,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
-    private String buildHttpMessageNotReadableMessage(HttpMessageNotReadableException ex) {
+    private List<String> buildMethodArgumentNotValidMessage(MethodArgumentNotValidException ex) {
+        List<String> errors = new ArrayList<>();
 
+        for (FieldError fieldError: ex.getBindingResult().getFieldErrors()) {
+            errors.add("Validation failed for field: '" + fieldError.getField() + "' message: " + fieldError.getDefaultMessage());
+        }
+        for (ObjectError objectError: ex.getBindingResult().getGlobalErrors()) {
+            errors.add(objectError.getDefaultMessage());
+        }
+
+        return errors;
+    }
+
+    private String buildHttpMessageNotReadableMessage(HttpMessageNotReadableException ex) {
         if (ex.getMostSpecificCause() instanceof MismatchedInputException mismatchedInputException) {
             return mismatchedInputException.getPath()
                     .stream()
