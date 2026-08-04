@@ -2,6 +2,7 @@ package com.example.test.boundary.rest;
 
 import com.example.test.control.CalculatorService;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -98,6 +99,25 @@ class CalculatorControllerTest {
                 .andExpect(jsonPath(VALUE).value(expected));
 
     }
+
+    @Test
+    @DisplayName("GET div endpoint should return BAD REQUEST when param is missing")
+    void divShouldReturnBadRequestWhenParamIsMissing() throws Exception {
+        mockMvc.perform(get(DIV_ENDPOINT)
+                        .param("val1", "1.0")
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages").value(
+                        "Validation failed for field: 'val2' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]")
+                )
+                .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
+
+    }
+
+
 
     private static Stream<Arguments> sumArguments() {
         return Stream.of(
