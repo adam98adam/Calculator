@@ -13,10 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import static java.util.Map.entry;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
@@ -106,20 +111,19 @@ class CalculatorControllerTest {
 
     }
 
-    @Test
+    @ParameterizedTest
     @DisplayName("GET div endpoint should return BAD REQUEST when param is missing")
-    void divShouldReturnBadRequestWhenParamIsMissing() throws Exception {
+    @MethodSource("divideArgumentsWithMissingParam")
+    void divShouldReturnBadRequestWhenParamIsMissing(MultiValueMap<String, String> params, String expectedMessage) throws Exception {
         mockMvc.perform(get(DIV_ENDPOINT)
-                        .param("val1", "1.0")
+                        .params(params)
                 )
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
                 .andExpect(jsonPath("$.messages", hasSize(1)))
-                .andExpect(jsonPath("$.messages").value(
-                        "Validation failed for field: 'val2' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]")
-                )
+                .andExpect(jsonPath("$.messages").value(expectedMessage))
                 .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
 
     }
@@ -374,6 +378,31 @@ class CalculatorControllerTest {
                 Arguments.arguments(1.0, 2.0, 0.5),
                 Arguments.arguments(-12.25, -2.0, 6.125),
                 Arguments.arguments(-12.25, 2.0, -6.125)
+        );
+    }
+
+    private static Stream<Arguments> divideArgumentsWithMissingParam() {
+        return Stream.of(
+                Arguments.arguments(
+                        MultiValueMap.fromSingleValue(
+                                Map.ofEntries(
+                                        entry("val1", "2")
+                                )
+                        ),
+                        "Validation failed for field: 'val2' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]"
+                ),
+                Arguments.arguments(
+                        MultiValueMap.fromSingleValue(
+                                Map.ofEntries(
+                                        entry("val2", "2")
+                                )
+                        ),
+                        "Validation failed for field: 'val1' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]"
+                ),
+                Arguments.arguments(
+                        MultiValueMap.fromSingleValue(Map.of()),
+                        "Validation failed for field: 'val1' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]"
+                )
         );
     }
 
