@@ -66,6 +66,7 @@ class CalculatorControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
                 .andExpect(jsonPath("$.messages").value(expectedMessage))
                 .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
 
@@ -83,6 +84,7 @@ class CalculatorControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
                 .andExpect(jsonPath("$.messages").value(expectedMessage))
                 .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
 
@@ -113,6 +115,7 @@ class CalculatorControllerTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
                 .andExpect(jsonPath("$.messages").value(
                         "Validation failed for field: 'val2' message: Failed to convert value of type 'null' to required type 'double'; Failed to convert from type [null] to type [double] for value [null]")
                 )
@@ -135,6 +138,24 @@ class CalculatorControllerTest {
                 .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
                 .andExpect(jsonPath("$.messages", hasSize(2)))
                 .andExpect(jsonPath("$.messages", containsInAnyOrder(expectedMessages.toArray())))
+                .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
+
+    }
+
+    @ParameterizedTest
+    @DisplayName("GET div endpoint should return BAD REQUEST when one of the params have invalid type")
+    @MethodSource("divideArgumentsWithInvalidType")
+    void divShouldReturnBadRequestWhenOneParamHaveInvalidType(String val1, String val2, String expectedMessage) throws Exception {
+        mockMvc.perform(get(DIV_ENDPOINT)
+                        .param("val1", val1)
+                        .param("val2", val2)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
+                .andExpect(jsonPath("$.messages").value(expectedMessage))
                 .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
 
     }
@@ -362,6 +383,31 @@ class CalculatorControllerTest {
                                 "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String",
                                 "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String"
                         )
+                )
+        );
+    }
+
+    private static Stream<Arguments> divideArgumentsWithInvalidType() {
+        return Stream.of(
+                Arguments.arguments(
+                        "abc",
+                        "1",
+                        "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"abc\""
+                ),
+                Arguments.arguments(
+                        "1",
+                        "abc",
+                        "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; For input string: \"abc\""
+                ),
+                Arguments.arguments(
+                        "",
+                        "1",
+                        "Validation failed for field: 'val1' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String"
+                ),
+                Arguments.arguments(
+                        "1",
+                        "",
+                        "Validation failed for field: 'val2' message: Failed to convert value of type 'java.lang.String' to required type 'double'; empty String"
                 )
         );
     }
