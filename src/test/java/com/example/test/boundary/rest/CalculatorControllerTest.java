@@ -28,10 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(
-        controllers = CalculatorController.class,
-        properties = "spring.jackson.mapper.allow-coercion-of-scalars=false"
-)
+@WebMvcTest(controllers = CalculatorController.class)
 class CalculatorControllerTest {
     private final static String ADD_ENDPOINT = "/add";
     private final static String DIV_ENDPOINT = "/div";
