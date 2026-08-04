@@ -59,9 +59,27 @@ class CalculatorControllerTest {
     }
 
     @ParameterizedTest
-    @DisplayName("POST add endpoint should return BAD REQUEST when passed value has invalid type or is missing")
+    @DisplayName("POST add endpoint should return BAD REQUEST when field is missing")
+    @MethodSource("sumArgumentsWithMissingField")
+    void addShouldReturnBadRequestWhenFieldIsMissing(String requestBody, String expectedMessage) throws Exception {
+        mockMvc.perform(post(ADD_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages", hasSize(1)))
+                .andExpect(jsonPath("$.messages").value(expectedMessage))
+                .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
+
+    }
+
+    @ParameterizedTest
+    @DisplayName("POST add endpoint should return BAD REQUEST when passed field has invalid type")
     @MethodSource("sumArgumentsWithInvalidType")
-    void addShouldReturnBadRequestWhenValueHasInvalidType(String requestBody, String expectedMessage) throws Exception {
+    void addShouldReturnBadRequestWhenFieldHasInvalidType(String requestBody, String expectedMessage) throws Exception {
         mockMvc.perform(post(ADD_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
@@ -252,6 +270,27 @@ class CalculatorControllerTest {
         );
     }
 
+    private static Stream<Arguments> sumArgumentsWithMissingField() {
+        return Stream.of(
+                Arguments.arguments(
+                        """
+                        {
+                            "val2": 6.0
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 6.0
+                        }
+                        """,
+                        "Field 'val2' has invalid type."
+                )
+        );
+    }
+
     private static Stream<Arguments> sumArgumentsWithInvalidType() {
         return Stream.of(
                 Arguments.arguments(
@@ -325,22 +364,6 @@ class CalculatorControllerTest {
                         }
                         """,
                         "Field 'val1' has invalid type."
-                ),
-                Arguments.arguments(
-                        """
-                        {
-                            "val2": 6.0
-                        }
-                        """,
-                        "Field 'val1' has invalid type."
-                ),
-                Arguments.arguments(
-                        """
-                        {
-                            "val1": 6.0
-                        }
-                        """,
-                        "Field 'val2' has invalid type."
                 )
         );
     }
