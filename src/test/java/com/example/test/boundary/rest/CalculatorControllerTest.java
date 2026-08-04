@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,6 +47,23 @@ class CalculatorControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(VALUE).value(expected));
+
+    }
+
+    @ParameterizedTest
+    @DisplayName("POST add endpoint should return BAD REQUEST when passed value has invalid type")
+    @MethodSource("sumArgumentsWithIncorrectType")
+    void addShouldReturnBadRequestWhenValueHasInvalidType(String requestBody, String expectedMessage) throws Exception {
+        mockMvc.perform(post(ADD_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages").value(expectedMessage))
+                .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
 
     }
 
@@ -130,6 +148,83 @@ class CalculatorControllerTest {
                             "val2": 0.0
                         }
                         """
+                )
+        );
+    }
+
+    private static Stream<Arguments> sumArgumentsWithIncorrectType() {
+        return Stream.of(
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": "12.0",
+                            "val2": 6.0
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 12.0,
+                            "val2": "6.0"
+                        }
+                        """,
+                        "Field 'val2' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": true,
+                            "val2": 6.0
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 12.0,
+                            "val2": false
+                        }
+                        """,
+                        "Field 'val2' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": null,
+                            "val2": 6.0
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 12.0,
+                            "val2": null
+                        }
+                        """,
+                        "Field 'val2' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": "12.0",
+                            "val2": "6.0"
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": true,
+                            "val2": false
+                        }
+                        """,
+                        "Field 'val1' has invalid type."
                 )
         );
     }
