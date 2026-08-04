@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
@@ -22,7 +21,7 @@ public class BadRequestHandler {
     ) {
         ErrorResponse errorResponse = ErrorResponse.of(
                 HttpStatus.BAD_REQUEST,
-                new ArrayList<>(List.of(exception.getMessage())),
+                List.of(exception.getMessage()),
                 ((ServletWebRequest) webRequest).getRequest().getRequestURI()
         );
 
