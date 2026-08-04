@@ -50,7 +50,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         ErrorResponse response = ErrorResponse.of(
                 (HttpStatus) status,
-                new ArrayList<>(List.of(buildHttpMessageNotReadableMessage(ex))),
+                List.of(buildHttpMessageNotReadableMessage(ex)),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
 
