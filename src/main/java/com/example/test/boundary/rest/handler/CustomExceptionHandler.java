@@ -58,17 +58,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         ErrorResponse response = ErrorResponse.of(
                 (HttpStatus) status,
-                new ArrayList<>(List.of(buildMessage(ex))),
+                new ArrayList<>(List.of(buildHttpMessageNotReadableMessage(ex))),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
 
         return ResponseEntity.status(status).body(response);
     }
 
-    private String buildMessage(HttpMessageNotReadableException ex) {
-        Throwable cause = ex.getMostSpecificCause();
+    private String buildHttpMessageNotReadableMessage(HttpMessageNotReadableException ex) {
 
-        if (cause instanceof MismatchedInputException mismatchedInputException) {
+        if (ex.getMostSpecificCause() instanceof MismatchedInputException mismatchedInputException) {
             return mismatchedInputException.getPath()
                     .stream()
                     .map(JacksonException.Reference::getPropertyName)
