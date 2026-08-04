@@ -68,6 +68,23 @@ class CalculatorControllerTest {
     }
 
     @ParameterizedTest
+    @DisplayName("POST add endpoint should return BAD REQUEST when invalid JSON was passed")
+    @MethodSource("sumArgumentsWithInvalidJson")
+    void addShouldReturnBadRequestWhenInvalidJsonWasPassed(String requestBody, String expectedMessage) throws Exception {
+        mockMvc.perform(post(ADD_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+                .andExpect(jsonPath("$.messages").value(expectedMessage))
+                .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
+
+    }
+
+    @ParameterizedTest
     @DisplayName("GET div endpoint should return OK status with correct value")
     @MethodSource("divideArguments")
     void divShouldReturnCorrectValue(double val1, double val2, double expected) throws Exception {
@@ -244,6 +261,29 @@ class CalculatorControllerTest {
                 )
         );
     }
+
+    private static Stream<Arguments> sumArgumentsWithInvalidJson() {
+        return Stream.of(
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 12.0
+                            "val2": 6.0
+                        }
+                        """,
+                        "Request body contains invalid JSON."
+                ),
+                Arguments.arguments(
+                        """
+                        {
+                            "val1": 12.0,
+                            "val2": 6.0
+                        """,
+                        "Request body contains invalid JSON."
+                )
+        );
+    }
+
 
     private static Stream<Arguments> divideArguments() {
         return Stream.of(
