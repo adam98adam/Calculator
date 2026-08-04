@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestControllerAdvice
 public class BadRequestHandler {
-    private static final HttpStatus status = HttpStatus.BAD_REQUEST;
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(
