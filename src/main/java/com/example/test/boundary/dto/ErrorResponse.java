@@ -12,6 +12,10 @@ public record ErrorResponse(
         List<String> messages,
         String path
 ) {
+    public ErrorResponse {
+        messages = List.copyOf(messages);
+    }
+
     public static ErrorResponse of(HttpStatus status, List<String> messages, String path) {
         return new ErrorResponse(
                 Instant.now(),
