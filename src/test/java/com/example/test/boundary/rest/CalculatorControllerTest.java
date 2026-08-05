@@ -60,7 +60,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value(expectedMessage))
         .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
@@ -76,7 +76,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value(expectedMessage))
         .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
@@ -92,7 +92,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value(expectedMessage))
         .andExpect(jsonPath("$.path").value(ADD_ENDPOINT));
@@ -123,7 +123,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value(expectedMessage))
         .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
@@ -139,7 +139,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(2)))
         .andExpect(jsonPath("$.messages", containsInAnyOrder(expectedMessages.toArray())))
         .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
@@ -156,7 +156,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value(expectedMessage))
         .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
@@ -172,7 +172,7 @@ class CalculatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.timestamp").exists())
         .andExpect(jsonPath("$.status").value(400))
-        .andExpect(jsonPath("$.errorName").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
+        .andExpect(jsonPath("$.error").value(HttpStatus.BAD_REQUEST.getReasonPhrase()))
         .andExpect(jsonPath("$.messages", hasSize(1)))
         .andExpect(jsonPath("$.messages").value("Divisor cannot be zero."))
         .andExpect(jsonPath("$.path").value(DIV_ENDPOINT));
