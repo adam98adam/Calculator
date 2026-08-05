@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CalculatorController {
-    final private CalculatorService calculatorService;
+  private final CalculatorService calculatorService;
 
-    public CalculatorController(CalculatorService calculatorService) {
-        this.calculatorService = calculatorService;
-    }
+  public CalculatorController(CalculatorService calculatorService) {
+    this.calculatorService = calculatorService;
+  }
 
-    @PostMapping(value = "/add")
-    private Response add(@RequestBody Request request) {
-        double value = calculatorService.add(request.val1(), request.val2());
-        return new Response(value);
-    }
+  @PostMapping(value = "/add")
+  private Response add(@RequestBody Request request) {
+    double value = calculatorService.add(request.val1(), request.val2());
+    return new Response(value);
+  }
 
-    @GetMapping(value = "/div")
-    private Response div(@ModelAttribute Request request) {
-        double value = calculatorService.divide(request.val1(), request.val2());
-        return new Response(value);
-    }
+  @GetMapping(value = "/div")
+  private Response div(@ModelAttribute Request request) {
+    double value = calculatorService.divide(request.val1(), request.val2());
+    return new Response(value);
+  }
 }

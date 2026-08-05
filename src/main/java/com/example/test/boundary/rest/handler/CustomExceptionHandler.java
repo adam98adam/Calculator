@@ -1,6 +1,9 @@
 package com.example.test.boundary.rest.handler;
 
 import com.example.test.boundary.dto.ErrorResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,70 +20,68 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.exc.MismatchedInputException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 @RestControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final String REQUEST_BODY_CONTAINS_INVALID_JSON = "Request body contains invalid JSON.";
+  private static final String REQUEST_BODY_CONTAINS_INVALID_JSON =
+      "Request body contains invalid JSON.";
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            @NonNull MethodArgumentNotValidException ex,
-            @NonNull HttpHeaders headers,
-            @NonNull HttpStatusCode status,
-            @NonNull WebRequest request
-    ) {
-        ErrorResponse response = ErrorResponse.of(
-                (HttpStatus) status,
-                buildMethodArgumentNotValidMessage(ex),
-                ((ServletWebRequest) request).getRequest().getRequestURI()
-        );
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      @NonNull MethodArgumentNotValidException ex,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status,
+      @NonNull WebRequest request) {
+    ErrorResponse response =
+        ErrorResponse.of(
+            (HttpStatus) status,
+            buildMethodArgumentNotValidMessage(ex),
+            ((ServletWebRequest) request).getRequest().getRequestURI());
 
-        return ResponseEntity.status(status).body(response);
+    return ResponseEntity.status(status).body(response);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleHttpMessageNotReadable(
+      @NonNull HttpMessageNotReadableException ex,
+      @NonNull HttpHeaders headers,
+      @NonNull HttpStatusCode status,
+      @NonNull WebRequest request) {
+    ErrorResponse response =
+        ErrorResponse.of(
+            (HttpStatus) status,
+            List.of(buildHttpMessageNotReadableMessage(ex)),
+            ((ServletWebRequest) request).getRequest().getRequestURI());
+
+    return ResponseEntity.status(status).body(response);
+  }
+
+  private List<String> buildMethodArgumentNotValidMessage(MethodArgumentNotValidException ex) {
+    List<String> errors = new ArrayList<>();
+
+    for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+      errors.add(
+          "Validation failed for field: '"
+              + fieldError.getField()
+              + "' message: "
+              + fieldError.getDefaultMessage());
+    }
+    for (ObjectError objectError : ex.getBindingResult().getGlobalErrors()) {
+      errors.add(objectError.getDefaultMessage());
     }
 
-    @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            @NonNull HttpMessageNotReadableException ex,
-            @NonNull HttpHeaders headers,
-            @NonNull HttpStatusCode status,
-            @NonNull WebRequest request
-    ) {
-        ErrorResponse response = ErrorResponse.of(
-                (HttpStatus) status,
-                List.of(buildHttpMessageNotReadableMessage(ex)),
-                ((ServletWebRequest) request).getRequest().getRequestURI()
-        );
+    return errors;
+  }
 
-        return ResponseEntity.status(status).body(response);
+  private String buildHttpMessageNotReadableMessage(HttpMessageNotReadableException ex) {
+    if (ex.getMostSpecificCause() instanceof MismatchedInputException mismatchedInputException) {
+      return mismatchedInputException.getPath().stream()
+          .map(JacksonException.Reference::getPropertyName)
+          .filter(Objects::nonNull)
+          .findFirst()
+          .map(field -> "Field '" + field + "' has invalid type.")
+          .orElse(REQUEST_BODY_CONTAINS_INVALID_JSON);
     }
 
-    private List<String> buildMethodArgumentNotValidMessage(MethodArgumentNotValidException ex) {
-        List<String> errors = new ArrayList<>();
-
-        for (FieldError fieldError: ex.getBindingResult().getFieldErrors()) {
-            errors.add("Validation failed for field: '" + fieldError.getField() + "' message: " + fieldError.getDefaultMessage());
-        }
-        for (ObjectError objectError: ex.getBindingResult().getGlobalErrors()) {
-            errors.add(objectError.getDefaultMessage());
-        }
-
-        return errors;
-    }
-
-    private String buildHttpMessageNotReadableMessage(HttpMessageNotReadableException ex) {
-        if (ex.getMostSpecificCause() instanceof MismatchedInputException mismatchedInputException) {
-            return mismatchedInputException.getPath()
-                    .stream()
-                    .map(JacksonException.Reference::getPropertyName)
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .map(field -> "Field '" + field + "' has invalid type.")
-                    .orElse(REQUEST_BODY_CONTAINS_INVALID_JSON);
-        }
-
-        return REQUEST_BODY_CONTAINS_INVALID_JSON;
-    }
+    return REQUEST_BODY_CONTAINS_INVALID_JSON;
+  }
 }
